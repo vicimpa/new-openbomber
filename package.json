@@ -1,0 +1,25 @@
+{
+  "name": "pixi-openbomber",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npm run dev",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@types/node": "^22.10.2",
+    "@vicimpa/events": "^0.0.11",
+    "@vicimpa/lib-vec2": "^0.2.11",
+    "@vicimpa/math": "^0.0.9",
+    "@vicimpa/perlin-noise": "^0.0.7",
+    "pixi.js": "^8.6.6"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2",
+    "vite": "^6.0.6",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}
