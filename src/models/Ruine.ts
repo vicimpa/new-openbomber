@@ -3,6 +3,7 @@ import { Vec2, Vec2Args, Vec2Hash, vec2 } from "@vicimpa/lib-vec2";
 import { entries, values } from "$library/object";
 
 import { TerrainDirs } from "$library/terrain";
+import { nextTick } from "$library/utils";
 import { randitem } from "$library/array";
 import { ruines } from "$resources/terrains";
 
@@ -11,11 +12,11 @@ export class Ruines extends Container {
   #data = new Set<Vec2Hash>();
   #changes = new Set<Vec2Hash>();
   #hasChange = false;
-  #raf = requestAnimationFrame(() => { });
+  #tick = nextTick(() => { });
 
   constructor(points: Vec2[] = []) {
     super();
-    points.forEach(({ x, y }) => this.set(x, y));
+    points.forEach((point) => this.set(point));
     this.cacheAsTexture(true);
   }
 
@@ -103,8 +104,8 @@ export class Ruines extends Container {
   }
 
   quieUpdate() {
-    cancelAnimationFrame(this.#raf);
-    this.#raf = requestAnimationFrame(() => {
+    this.#tick();
+    this.#tick = nextTick(() => {
       this.update();
       this.#changes.clear();
       if (!this.#hasChange) return;
