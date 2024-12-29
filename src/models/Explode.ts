@@ -9,27 +9,30 @@ import { from } from "$library/array";
 const maxframe = explode.normal.length - 1;
 const helperSprite = new Sprite();
 
-const explodeNormal = explode.normal.map(texture => {
-  const { source, frame } = app.renderer.generateTexture((
-    helperSprite.texture = texture, helperSprite
-  ));
+const explodeNormal = app.then(app => {
+  return explode.normal.map((texture) => {
+    const { source, frame } = app.renderer.generateTexture((
+      helperSprite.texture = texture, helperSprite
+    ));
+    const size = Vec2.fromSize(frame).div(5);
 
-  const size = Vec2.fromSize(frame).div(5);
-
-  return from(5, y => (
-    from(5, x => (
-      new Texture({
-        source,
-        frame: new Rectangle(
-          x * size.x,
-          y * size.y,
-          size.x,
-          size.y
-        )
-      })
-    ))
-  ));
+    return from(5, y => (
+      from(5, x => (
+        new Texture({
+          source,
+          frame: new Rectangle(
+            x * size.x,
+            y * size.y,
+            size.x,
+            size.y
+          )
+        })
+      ))
+    ));
+  });
 });
+
+
 
 export type ExplodeOptions = {
   top?: number;
@@ -40,6 +43,7 @@ export type ExplodeOptions = {
 } & ContainerOptions;
 
 class ExplodeItem extends Sprite {
+  private __explodeNormal?: Texture[][][];
   private __now: Vec2;
   private __l: number;
   private __frame = -1;
@@ -52,7 +56,7 @@ class ExplodeItem extends Sprite {
     const l = this.__l;
     const now = this.__now;
     this.__frame = value;
-    this.texture = explodeNormal[l > 1 && value < 3 ? 0 : value][now.y][now.x];
+    this.texture = this.__explodeNormal?.[l > 1 && value < 3 ? 0 : value][now.y][now.x] ?? Texture.EMPTY;
   }
 
   constructor(
@@ -67,6 +71,12 @@ class ExplodeItem extends Sprite {
     this.__l = now.length();
     this.__now = now.normalize().times(mult).plus(2);
     this.frame = 0;
+  }
+
+  onMount(): void {
+    explodeNormal.then(sprites => {
+      this.__explodeNormal = sprites;
+    });
   }
 }
 

@@ -18,6 +18,7 @@
     "pixi.js": "^8.6.6"
   },
   "devDependencies": {
+    "terser": "^5.37.0",
     "typescript": "~5.7.2",
     "vite": "^6.0.6",
     "vite-tsconfig-paths": "^5.1.4"

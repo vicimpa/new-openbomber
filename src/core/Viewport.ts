@@ -1,11 +1,13 @@
-import { Container, Ticker } from "pixi.js";
+import { Application, Container, Ticker } from "pixi.js";
 import { Vec2, vec2 } from "@vicimpa/lib-vec2";
 
-import { app } from "./app";
+import { app } from "$modules/app";
 import { clamp } from "@vicimpa/math";
 import { vec2filter } from "$library/filters";
 
 export class Viewport extends Container {
+  app?: Application;
+
   #center = vec2();
   #scale = vec2(1);
 
@@ -16,18 +18,27 @@ export class Viewport extends Container {
   shakes = new Set<{ time: number, amp: number; }>();
   filterAmp = vec2filter(3);
 
+  scene = this.add(Container);
+
   get needScale() {
-    const size = Vec2.fromSize(app.canvas);
+    if (!this.app) throw new Error('No init app');
+    const size = Vec2.fromSize(this.app.canvas);
     return vec2((size.min() / this.radius));
   }
 
   constructor() {
     super({ isRenderGroup: true });
-    this.needScale.toObject(this.#scale);
+  }
+
+  onMount(): void {
+    app.then(app => {
+      this.app = app;
+      this.needScale.toObject(this.#scale);
+    });
   }
 
   shake(target: Container, pos = vec2()) {
-    const dis = vec2(target.toLocal(pos, scene)).distance(this.center);
+    const dis = vec2(target.toLocal(pos, this.scene)).distance(this.center);
     const sdis = clamp(dis, 24, Infinity) ** 2;
     this.shakes.add({
       time: 0,
@@ -37,6 +48,8 @@ export class Viewport extends Container {
   }
 
   onTick({ deltaTime }: Ticker) {
+    if (!this.app) return;
+
     this.shakes.forEach((item) => {
       item.time += deltaTime * .3;
     });
@@ -62,7 +75,7 @@ export class Viewport extends Container {
         this.focus = undefined;
       } else
         this.center.set(
-          this.focus.toLocal(vec2(), scene)
+          this.focus.toLocal(vec2(), this.scene)
         );
     }
 
@@ -79,11 +92,8 @@ export class Viewport extends Container {
       .plus(this.#scale)
       .toObject(this.#scale);
 
-    Vec2.fromSize(app.canvas).times(.5).plus(amp).toObject(this);
+    Vec2.fromSize(this.app.canvas).times(.5).plus(amp).toObject(this);
     this.#scale.toObject(this.scale);
-    this.#center.toObject(scene);
+    this.#center.toObject(this.scene);
   }
 }
-
-export const viewport = app.stage.add(Viewport);
-export const scene = viewport.add(Container);

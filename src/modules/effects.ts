@@ -26,28 +26,30 @@ Object.defineProperty(Container.prototype, 'isMounted', {
   }
 });
 
-app.ticker.add((ticker) => {
-  var childs = new Set<Container>();
+app.then(app => {
+  app.ticker.add((ticker) => {
+    var childs = new Set<Container>();
 
-  for (const child of flat(app.stage, (e) => e.children)) {
-    childs.add(child);
+    for (const child of flat(app.stage, (e) => e.children)) {
+      childs.add(child);
 
-    if (!child[$MOUNTED]) {
-      child[$MOUNTED] = true;
-      child.onMount?.();
+      if (!child[$MOUNTED]) {
+        child[$MOUNTED] = true;
+        child.onMount?.();
+      }
     }
-  }
 
-  for (const child of oldChilds) {
-    if (!childs.has(child)) {
-      child[$MOUNTED] = false;
-      child.onUnmount?.();
+    for (const child of oldChilds) {
+      if (!childs.has(child)) {
+        child[$MOUNTED] = false;
+        child.onUnmount?.();
+      }
     }
-  }
 
-  for (const child of childs) {
-    child.onTick?.(ticker);
-  }
+    for (const child of childs) {
+      child.onTick?.(ticker);
+    }
 
-  oldChilds = childs;
+    oldChilds = childs;
+  });
 });

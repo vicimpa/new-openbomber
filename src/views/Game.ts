@@ -7,10 +7,10 @@ import { Bonuses } from "./Bonuses";
 import { Effects } from "./Effects";
 import { Hero } from "../models/Hero";
 import { Ruines } from "../models/Ruine";
+import { Viewport } from "$core/Viewport";
 import { World } from "../models/World";
 import { clamp } from "@vicimpa/math";
 import { generator3000 } from "$library/generator";
-import { viewport } from "$modules/viewport";
 
 const size = vec2(17);
 const csize = size.cdiv(2).floor();
@@ -35,11 +35,14 @@ export class Game extends Container {
     fire: 0,
   };
 
+  constructor(public viewport: Viewport) {
+    super();
+  }
+
   onMount(): void {
     const size = Vec2.fromSize(this.world);
 
-    viewport.radius = (size.max() + 3) * 32;
-
+    this.viewport.radius = (size.max() + 3) * 32;
     this.player = this.heroes.add(Hero, { type: 'type8' });
 
     size
@@ -50,8 +53,8 @@ export class Game extends Container {
       .times(-1)
       .toObject(this.player);
 
-    viewport.focus = this.player;
-    viewport.radius = 256;
+    this.viewport.focus = this.player;
+    this.viewport.radius = 256;
   }
 
   onTick(ticker: Ticker): void {

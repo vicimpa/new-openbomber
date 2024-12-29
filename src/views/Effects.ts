@@ -9,7 +9,6 @@ import { Game } from "./Game";
 import { Give } from "$models/Give";
 import { Hero } from "$models/Hero";
 import { random } from "@vicimpa/math";
-import { viewport } from "$modules/viewport";
 import { world } from "$resources/image";
 
 const dirs = [
@@ -93,7 +92,7 @@ export class Effects extends Container {
           this.game.ruines.set(...point.tuple);
         });
         if (!pow) return;
-        viewport.shake(explode);
+        this.game.viewport.shake(explode);
       },
     });
   }
