@@ -1,16 +1,15 @@
 import { Container, Sprite } from "pixi.js";
-import { VHash, vhash, vparse } from "$library/vhash";
+import { Vec2, Vec2Args, Vec2Hash, vec2 } from "@vicimpa/lib-vec2";
 import { entries, values } from "$library/object";
 
 import { TerrainDirs } from "$library/terrain";
-import { Vec2 } from "@vicimpa/lib-vec2";
 import { randitem } from "$library/array";
 import { ruines } from "$resources/terrains";
 
 export class Ruines extends Container {
-  #cache = new Map<VHash, Sprite>();
-  #data = new Set<VHash>();
-  #changes = new Set<VHash>();
+  #cache = new Map<Vec2Hash, Sprite>();
+  #data = new Set<Vec2Hash>();
+  #changes = new Set<Vec2Hash>();
   #hasChange = false;
   #raf = requestAnimationFrame(() => { });
 
@@ -20,12 +19,12 @@ export class Ruines extends Container {
     this.cacheAsTexture(true);
   }
 
-  has(x: number, y: number) {
-    return this.#data.has(vhash(x, y));
+  has(...args: Vec2Args) {
+    return this.#data.has(vec2(...args).hash);
   }
 
-  set(x: number, y: number) {
-    const _hash = vhash(x, y);
+  set(...args: Vec2Args) {
+    const _hash = vec2(...args).hash;
 
     if (!this.#data.has(_hash))
       this.#changes.add(_hash);
@@ -34,8 +33,8 @@ export class Ruines extends Container {
     this.quieUpdate();
   }
 
-  del(x: number, y: number) {
-    const _hash = vhash(x, y);
+  del(...args: Vec2Args) {
+    const _hash = vec2(...args).hash;
     if (this.#data.has(_hash))
       this.#changes.add(_hash);
 
@@ -54,20 +53,20 @@ export class Ruines extends Container {
   }
 
   update() {
-    const quie = new Set<VHash>();
+    const quie = new Set<Vec2Hash>();
     this.#changes.forEach(change => {
-      const { x, y } = vparse(change);
+      const vec = Vec2.fromHash(change);
       values(TerrainDirs).forEach(([_x, _y]) => {
-        quie.add(vhash(x + _x, y + _y));
+        quie.add(vec.cplus(_x, _y).hash);
       });
     });
 
     quie.forEach((raw) => {
-      const { x, y } = vparse(raw);
+      const vec = Vec2.fromHash(raw);
       let flags = 0;
 
       entries(TerrainDirs).forEach(([e, [_x, _y]]) => {
-        if (this.#data.has(vhash(x + _x, y + _y)))
+        if (this.#data.has(vec.cplus(_x, _y).hash))
           flags = flags | e;
       });
 
@@ -88,8 +87,7 @@ export class Ruines extends Container {
         this.#cache.set(raw, (
           this.#hasChange = true,
           this.add(Sprite, {
-            x: x * 32,
-            y: y * 32,
+            ...vec.ctimes(32),
             texture,
             anchor: .5
           })

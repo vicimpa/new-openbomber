@@ -4,7 +4,7 @@ import { Bonus } from "$models/Bonus";
 import { Container } from "pixi.js";
 import { Game } from "./Game";
 import { Hero } from "$models/Hero";
-import { circle2square } from "$library/collides";
+import { cir2sqr } from "$library/collides";
 import { randitem } from "$library/array";
 
 export class Bonuses extends Container {
@@ -20,7 +20,7 @@ export class Bonuses extends Container {
 
   give(player: Hero) {
     const pos = vec2(player);
-    const find = this.children.find(e => e instanceof Bonus && circle2square(pos, 8, vec2(e), 12).length() > 0);
+    const find = this.children.find(e => e instanceof Bonus && cir2sqr(pos, 8, vec2(e), 12));
     if (find instanceof Bonus) {
       this.game.fx.give(find, player);
       find.destroy();

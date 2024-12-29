@@ -1,7 +1,7 @@
 import { Container, Sprite, Texture } from "pixi.js";
 import { Vec2, vec2 } from "@vicimpa/lib-vec2";
 
-import { circle2square } from "$library/collides";
+import { cir2sqr } from "$library/collides";
 import { max } from "@vicimpa/math";
 import { nextTick } from "$library/utils";
 import { world } from "$resources/image";
@@ -121,11 +121,11 @@ export class World extends Container {
         const tile = this.getTile(tpos);
         if (!tile || tile === 'grass' || tile === 'grass2')
           continue;
-        const cor = circle2square(pos, .25, tpos, 1);
-        correct.plus(cor);
+        const cor = cir2sqr(pos, .25, tpos, 1);
+        cor && correct.plus(cor);
       }
     }
 
-    return correct.times(32);
+    return correct;
   }
 }

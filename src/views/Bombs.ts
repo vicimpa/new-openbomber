@@ -3,7 +3,7 @@ import { Vec2, vec2 } from "@vicimpa/lib-vec2";
 import { Bomb } from "$models/Bomb";
 import { Container } from "pixi.js";
 import { Game } from "./Game";
-import { circle2circle } from "$library/collides";
+import { cir2cir } from "$library/collides";
 
 export class Bombs extends Container {
   constructor(public game: Game) {
@@ -37,7 +37,7 @@ export class Bombs extends Container {
     this.children.forEach(node => {
       if (node instanceof Bomb) {
         if (!node.ignore) return;
-        if (!circle2circle(vec2(node), 10, pos, 10).length())
+        if (!cir2cir(vec2(node), 10, pos, 10))
           node.ignore = false;
       }
     });
@@ -49,7 +49,8 @@ export class Bombs extends Container {
     this.children.forEach(node => {
       if (node instanceof Bomb) {
         if (node.ignore) return;
-        correct.plus(circle2circle(pos, 8, vec2(node), 12));
+        const cor = cir2cir(pos, 8, vec2(node), 12);
+        cor && correct.plus(cor);
       }
     });
 

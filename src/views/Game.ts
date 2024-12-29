@@ -106,7 +106,7 @@ export class Game extends Container {
 
       pos
         .plus(move)
-        .plus(this.world.getCorrect(pos.cdiv(32)))
+        .plus(this.world.getCorrect(pos.cdiv(32)).times(32))
         .plus(this.bombs.getCorrect(pos))
         .toObject(player);
     } else {

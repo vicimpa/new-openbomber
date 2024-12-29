@@ -39,6 +39,5 @@ export const generator3000 = (width: number, height: number, positions: Vec2[]) 
     map[vec.y][vec.x] = 'box';
   }
 
-
   return map;
 };
