@@ -12,7 +12,7 @@ export class Viewport extends Container {
   #scale = vec2(1);
 
   center = vec2(0, 0);
-  radius = 256;
+  radius = 2048;
   focus?: Container;
 
   shakes = new Set<{ time: number, amp: number; }>();
@@ -33,7 +33,6 @@ export class Viewport extends Container {
   onMount(): void {
     app.then(app => {
       this.app = app;
-      this.needScale.toObject(this.#scale);
     });
   }
 

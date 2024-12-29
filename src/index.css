@@ -12,9 +12,30 @@ body {
 
 body {
   position: relative;
+  background-color: #024E4E;
+  background-image: url('noise.png');
+  background-size: 400px;
+  image-rendering: pixelated;
+  background-position: center;
+}
+
+.loader {
+  position: absolute;
+  inset: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  border: 2px solid #fff;
+  z-index: 1;
+  opacity: 1;
+  transition: opacity .4s;
 }
 
 canvas {
   position: absolute;
   inset: 0;
+  opacity: 0;
+  transition: opacity .4s;
 }

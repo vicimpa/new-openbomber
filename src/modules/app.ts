@@ -7,5 +7,5 @@ const _app = new Application();
 export const app = _app.init({
   canvas: dom('canvas', { appendTo: body() }),
   resizeTo: body(),
-  backgroundColor: '#718F69',
+  backgroundAlpha: 0,
 }).then(() => _app);
