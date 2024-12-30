@@ -1,36 +1,74 @@
-import { entries, values } from "$library/object";
-import { Assets, Spritesheet, SpritesheetData, Texture } from "pixi.js";
+import { assign, entries, values } from "$library/object";
+import { Assets, Rectangle, Spritesheet, SpritesheetData, SpritesheetFrameData, Texture } from "pixi.js";
 
 export type Frames<D extends SpritesheetData> = keyof D['frames'];
 export type SplitFrame<F, S extends string> = F extends `${infer T}${S}${string}` ? T : never;
 
-export async function loadSpritesheet<const D extends SpritesheetData>(
+const tasks: Promise<any>[] = [];
+
+type SpritesheetDataArray = Omit<SpritesheetData, 'frames'> & {
+  frames: (SpritesheetFrameData & { filename: string; })[];
+};
+
+export const awaitAllTasks = () => Promise.all(tasks);
+
+export function loadSpritesheet<const D extends SpritesheetData>(
   data: D, image: string
 ) {
-  const sprites = await new Spritesheet(
-    await Assets.load(image),
-    data
-  ).parse();
+  const output = entries(data.frames)
+    .reduce((acc, [key]) => {
+      return assign(acc, {
+        [key]: new Texture()
+      });
+    }, {} as Record<Frames<D>, Texture>);
 
-  return sprites as Record<Frames<D>, Texture>;
+  tasks.push(
+    Assets.load<Texture>(image)
+      .then(texture => new Spritesheet(texture, data))
+      .then(sprites => sprites.parse())
+      .then(parsedData => {
+        entries(parsedData)
+          .forEach(([key, value]) => {
+            assign(output[key], value);
+          });
+      })
+  );
+
+  return output;
 }
 
-export async function loadSpritesheetArray<const D extends SpritesheetData>(
+export function loadSpritesheetArray<const D extends SpritesheetData>(
   data: D, image: string
 ) {
-  const sprites = await new Spritesheet(
-    await Assets.load(image),
-    data
-  ).parse();
-
-  return values(sprites);
+  return values(loadSpritesheet(data, image));
 }
 
-export async function loadSpritesheetSplited<
+export function loadSpritesheetFromArra<const D extends SpritesheetDataArray>(
+  data: D, image: string
+) {
+  const output = data.frames.map(({ frame }) => {
+    return new Texture({
+      frame: new Rectangle(frame.x, frame.y, frame.w, frame.h)
+    });
+  });
+
+  tasks.push(
+    Assets.load(image)
+      .then(texture => {
+        output.map(item => {
+          item.source = texture.source;
+        });
+      })
+  );
+
+  return output;
+}
+
+export function loadSpritesheetSplited<
   const D extends SpritesheetData,
   const S extends string
 >(data: D, image: string, sep: S) {
-  const loaded = await loadSpritesheet(data, image);
+  const loaded = loadSpritesheet(data, image);
   const output: Record<string, Texture[]> = {};
 
   entries(loaded)
