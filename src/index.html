@@ -88,31 +88,10 @@
       </div>
       <h3 class="loading">Loading...</h3>
     </div>
-
   </div>
-
-  <script>
-    const can = document.createElement('canvas');
-    const ctx = can.getContext('2d');
-
-    can.width = 32;
-    can.height = 32;
-
-    for (let x = 0; x < 32; x++) {
-      for (let y = 0; y < 32; y++) {
-        var color = Math.random() * 256 | 0;
-        ctx.globalAlpha = .01;
-        ctx.fillStyle = '#' + color.toString(16).padStart(2, '0').repeat(3);
-        ctx.fillRect(x, y, 1, 1);
-      }
-    }
-
-    document.body.appendChild(can);
-  </script>
-
   <script type="module" src="resources/index.ts"></script>
   <script type="module" src="modules/index.ts"></script>
-  <script type="module" src="app.ts"></script>
+  <script type="module" src="index.ts"></script>
 </body>
 
 </html>
