@@ -58,6 +58,9 @@ export class Game extends Container {
   }
 
   onTick(ticker: Ticker): void {
+    if (ticker.deltaTime > 2)
+      return;
+
     const { player, move, bombs } = this;
 
     if (player) {
