@@ -11,7 +11,8 @@ const container = document.getElementById('container')!;
 const progress: HTMLElement = container.querySelector('#progress')!;
 const layer = progress?.querySelector<HTMLDivElement>('[data-layer]')!;
 
-awaitAllTasksSignal((a, b) => layer.style.width = `${(a / b) * 100}%`)
+Promise.resolve()
+  .then(() => awaitAllTasksSignal((a, b) => layer.style.width = `${(a / b) * 100}%`))
   .then(() => new Promise(resolve => setTimeout(resolve, 300)))
   .then(() => app)
   .then((app) => {
