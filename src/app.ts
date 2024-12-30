@@ -11,25 +11,23 @@ const container = document.getElementById('container')!;
 const progress: HTMLElement = container.querySelector('#progress')!;
 const layer = progress?.querySelector<HTMLDivElement>('[data-layer]')!;
 
-addEventListener('load', () => {
-  awaitAllTasksSignal((a, b) => layer.style.width = `${(a / b) * 100}%`)
-    .then(() => new Promise(resolve => setTimeout(resolve, 300)))
-    .then(() => app)
-    .then((app) => {
-      return new Promise<Application>((resolve) => {
-        container.replaceWith(
-          dom('button', {
-            innerHTML: 'Continue',
-            onclick: resolve.bind(null, app)
-          })
-        );
-      });
-    })
-    .then(app => {
-      const viewport = app.stage.add(Viewport);
-      viewport.scene.add(Ground, app, { seed: 11 });
-      viewport.scene.add(Game, viewport);
-      loader.style.opacity = '0';
-      app.canvas.style.opacity = '1';
+awaitAllTasksSignal((a, b) => layer.style.width = `${(a / b) * 100}%`)
+  .then(() => new Promise(resolve => setTimeout(resolve, 300)))
+  .then(() => app)
+  .then((app) => {
+    return new Promise<Application>((resolve) => {
+      container.replaceWith(
+        dom('button', {
+          innerHTML: 'Continue',
+          onclick: resolve.bind(null, app)
+        })
+      );
     });
-});
+  })
+  .then(app => {
+    const viewport = app.stage.add(Viewport);
+    viewport.scene.add(Ground, app, { seed: 11 });
+    viewport.scene.add(Game, viewport);
+    loader.style.opacity = '0';
+    app.canvas.style.opacity = '1';
+  });
