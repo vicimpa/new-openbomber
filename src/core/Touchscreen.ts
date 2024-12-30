@@ -8,7 +8,6 @@ import { nextTick } from "$library/utils";
 import { windowEvents } from "@vicimpa/events";
 
 export class Touchscreen {
-  acc = .3;
   private _axis = vec2();
   private _buttons: { a?: number, b?: number, x?: number, y?: number; } = {};
   private _preview = 0;
@@ -28,6 +27,8 @@ export class Touchscreen {
 
   private _axisTime = performance.now();
   private _buttonsTime = performance.now();
+
+  constructor(public acc = .3) { }
 
   axis() {
     this._axisTime = performance.now();
@@ -101,10 +102,10 @@ export class Touchscreen {
           this.touchButton(e);
         }
       },
-        dom('div', { id: '_a', ref: el => { this._ebuttons.a = el; } }),
-        dom('div', { id: '_b', ref: el => { this._ebuttons.b = el; } }),
-        dom('div', { id: '_x', ref: el => { this._ebuttons.x = el; } }),
-        dom('div', { id: '_y', ref: el => { this._ebuttons.y = el; } }),
+        dom('div', { ref: el => { this._ebuttons.a = el; } }),
+        dom('div', { ref: el => { this._ebuttons.b = el; } }),
+        dom('div', { ref: el => { this._ebuttons.x = el; } }),
+        dom('div', { ref: el => { this._ebuttons.y = el; } }),
       )
     )
   );
