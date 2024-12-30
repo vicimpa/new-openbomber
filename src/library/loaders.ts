@@ -35,6 +35,7 @@ export function loadSpritesheet<const D extends SpritesheetData>(
         entries(parsedData)
           .forEach(([key, value]) => {
             assign(output[key], value);
+            output[key].update();
           });
       })
   );
@@ -64,6 +65,7 @@ export function loadSpritesheetFromArra<const D extends SpritesheetDataArray>(
             source: texture.source,
             frame: new Rectangle(frame.x, frame.y, frame.w, frame.h)
           }));
+          item.update();
         });
       })
   );

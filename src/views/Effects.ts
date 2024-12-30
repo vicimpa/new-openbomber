@@ -88,8 +88,7 @@ export class Effects extends Container {
       onFire: (points, explode) => {
         destroy.forEach(e => e());
         points.forEach(point => {
-          point = point.cdiv(32);
-          this.game.ruines.set(...point.tuple);
+          this.game.ruines.set(point.cdiv(32));
         });
         if (!pow) return;
         this.game.viewport.shake(explode);
