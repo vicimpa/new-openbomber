@@ -9,9 +9,7 @@ export default defineConfig({
     emptyOutDir: true,
     outDir: '../dist',
     target: 'esnext',
-    reportCompressedSize: false,
-    assetsInlineLimit: -1,
-    chunkSizeWarningLimit: Infinity
+    reportCompressedSize: false
   },
   plugins: [
     paths({ root: '..' }),

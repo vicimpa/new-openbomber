@@ -1,15 +1,29 @@
+import { Application } from "pixi.js";
 import { Game } from "$views/Game";
 import { Ground } from "$models/Ground";
 import { Viewport } from "$core/Viewport";
 import { app } from "$modules/app";
 import { awaitAllTasksSignal } from "$library/loaders";
+import { dom } from "$library/dom";
 
 const loader = document.getElementById('loader')!;
-const layer: HTMLElement = document.getElementById('progress')?.querySelector('[data-layer]')!;
+const container = document.getElementById('container')!;
+const progress: HTMLElement = container.querySelector('#progress')!;
+const layer = progress?.querySelector<HTMLDivElement>('[data-layer]')!;
 
 awaitAllTasksSignal((a, b) => layer.style.width = `${(a / b) * 100}%`)
   .then(() => new Promise(resolve => setTimeout(resolve, 300)))
   .then(() => app)
+  .then((app) => {
+    return new Promise<Application>((resolve) => {
+      container.replaceWith(
+        dom('button', {
+          innerHTML: 'Continue',
+          onclick: resolve.bind(null, app)
+        })
+      );
+    });
+  })
   .then(app => {
     const viewport = app.stage.add(Viewport);
     viewport.scene.add(Ground, app, { seed: 11 });

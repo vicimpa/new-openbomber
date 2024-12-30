@@ -12,7 +12,7 @@ export class Viewport extends Container {
   #scale = vec2(1);
 
   center = vec2(0, 0);
-  radius = 2048;
+  radius = innerWidth;
   focus?: Container;
 
   shakes = new Set<{ time: number, amp: number; }>();

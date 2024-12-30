@@ -13,14 +13,21 @@ export const dom = <K extends keyof HTMLElementTagNameMap>(
   const _elem = document.createElement(type);
   const { ref, appendTo, ..._props } = props;
 
-  entries(_elem).forEach(([key, value]) => {
-    if (key in _props) {
-      if (typeof _elem[key] !== 'object')
+  entries(_props)
+    .forEach(([key, value]) => {
+      if (key.toString().startsWith('on')) {
         assign(_elem, { [key]: value });
-      else if (_elem[key])
-        assign(_elem[key], { [key]: value });
-    }
-  });
+        return;
+      }
+
+      if (key in _props) {
+        if (typeof _elem[key] !== 'object')
+          assign(_elem, { [key]: value });
+        else if (_elem[key])
+          assign(_elem[key], { [key]: value });
+      }
+
+    });
 
   ref?.(_elem);
 
