@@ -51,17 +51,19 @@ export function loadSpritesheetArray<const D extends SpritesheetData>(
 export function loadSpritesheetFromArra<const D extends SpritesheetDataArray>(
   data: D, image: string
 ) {
-  const output = data.frames.map(({ frame }) => {
-    return new Texture({
-      frame: new Rectangle(frame.x, frame.y, frame.w, frame.h)
-    });
+  const output = data.frames.map(() => {
+    return new Texture();
   });
 
   tasks.push(
-    Assets.load(image)
+    Assets.load<Texture>(image)
       .then(texture => {
-        output.map(item => {
-          item.source = texture.source;
+        output.map((item, index) => {
+          const { frame } = data.frames[index];
+          assign(item, new Texture({
+            source: texture.source,
+            frame: new Rectangle(frame.x, frame.y, frame.w, frame.h)
+          }));
         });
       })
   );

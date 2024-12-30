@@ -1,5 +1,5 @@
 import { Container, Sprite, Texture } from "pixi.js";
-import { Vec2, vec2 } from "@vicimpa/lib-vec2";
+import { Vec2, Vec2Map, vec2 } from "@vicimpa/lib-vec2";
 
 import { cir2sqr } from "$library/collides";
 import { max } from "@vicimpa/math";
@@ -7,13 +7,12 @@ import { nextTick } from "$library/utils";
 import { world } from "$resources/image";
 
 export type Tile = (keyof typeof world) | '';
-export type HashVec2 = `${number}:${number}`;
 
 export class World extends Container {
-  #data = new Map<HashVec2, Tile>();
+  #data = new Vec2Map<Tile>();
   #tick = nextTick(() => { });
   #hasChange = false;
-  #cache = new Map<HashVec2, Sprite | null>();
+  #cache = new Vec2Map<Sprite | null>();
   #width = 0;
   #height = 0;
 
@@ -55,24 +54,23 @@ export class World extends Container {
   }
 
   update() {
-    this.#cache.forEach((sprite, hash) => {
-      if (!this.#data.has(hash)) {
+    this.#cache.forEach((vec, sprite) => {
+      if (!this.#data.has(vec)) {
         sprite?.destroy();
         this.#hasChange = true;
       }
     });
 
-    this.#data.forEach((tile, hash) => {
-      const vec = Vec2.fromHash(hash);
+    this.#data.forEach((vec, tile) => {
       const texture = tile === '' ? Texture.EMPTY : world[tile];
-      const sprite = this.#cache.get(hash) ?? (
+      const sprite = this.#cache.get(vec) ?? (
         this.#hasChange = true,
-        this.#cache.set(hash, this.add(Sprite, {
+        this.#cache.set(this.add(Sprite, {
           texture,
           x: vec.x * 32 - 16,
           y: vec.y * 32 - 16,
-        })),
-        this.#cache.get(hash)!
+        }), vec),
+        this.#cache.get(vec)!
       );
 
       if (sprite.texture !== texture) {
@@ -93,18 +91,18 @@ export class World extends Container {
   }
 
   getTile(vec: Vec2) {
-    return this.#data.get(vec.hash) ?? '';
+    return this.#data.get(vec) ?? '';
   }
 
   delTile(vec: Vec2) {
-    if (this.#data.delete(vec.hash))
+    if (this.#data.delete(vec))
       this.quieUpdate();
   }
 
   setTile(vec: Vec2, tile: Tile) {
-    if (this.#data.get(vec.hash) !== tile)
+    if (this.#data.get(vec) !== tile)
       this.quieUpdate();
-    this.#data.set(vec.hash, tile);
+    this.#data.set(tile, vec);
   }
 
   clearTile() {

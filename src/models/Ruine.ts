@@ -1,5 +1,5 @@
 import { Container, Sprite } from "pixi.js";
-import { Vec2, Vec2Args, Vec2Hash, vec2 } from "@vicimpa/lib-vec2";
+import { Vec2, Vec2Args, Vec2Map, Vec2Set } from "@vicimpa/lib-vec2";
 import { entries, values } from "$library/object";
 
 import { TerrainDirs } from "$library/terrain";
@@ -8,9 +8,9 @@ import { randitem } from "$library/array";
 import { ruines } from "$resources/terrains";
 
 export class Ruines extends Container {
-  #cache = new Map<Vec2Hash, Sprite>();
-  #data = new Set<Vec2Hash>();
-  #changes = new Set<Vec2Hash>();
+  #cache = new Vec2Map<Sprite>();
+  #data = new Vec2Set();
+  #changes = new Vec2Set();
   #hasChange = false;
   #tick = nextTick(() => { });
 
@@ -21,25 +21,22 @@ export class Ruines extends Container {
   }
 
   has(...args: Vec2Args) {
-    return this.#data.has(vec2(...args).hash);
+    return this.#data.has(...args);
   }
 
   set(...args: Vec2Args) {
-    const _hash = vec2(...args).hash;
+    if (!this.#data.has(...args))
+      this.#changes.add(...args);
 
-    if (!this.#data.has(_hash))
-      this.#changes.add(_hash);
-
-    this.#data.add(_hash);
+    this.#data.add(...args);
     this.quieUpdate();
   }
 
   del(...args: Vec2Args) {
-    const _hash = vec2(...args).hash;
-    if (this.#data.has(_hash))
-      this.#changes.add(_hash);
+    if (this.#data.has(...args))
+      this.#changes.add(...args);
 
-    this.#data.delete(_hash);
+    this.#data.delete(...args);
     this.quieUpdate();
   }
 
@@ -54,20 +51,18 @@ export class Ruines extends Container {
   }
 
   update() {
-    const quie = new Set<Vec2Hash>();
+    const quie = new Vec2Set();
     this.#changes.forEach(change => {
-      const vec = Vec2.fromHash(change);
       values(TerrainDirs).forEach(([_x, _y]) => {
-        quie.add(vec.cplus(_x, _y).hash);
+        quie.add(change.cplus(_x, _y));
       });
     });
 
-    quie.forEach((raw) => {
-      const vec = Vec2.fromHash(raw);
+    quie.forEach((vec) => {
       let flags = 0;
 
       entries(TerrainDirs).forEach(([e, [_x, _y]]) => {
-        if (this.#data.has(vec.cplus(_x, _y).hash))
+        if (this.#data.has(vec.cplus(_x, _y)))
           flags = flags | e;
       });
 
@@ -76,24 +71,24 @@ export class Ruines extends Container {
         .map(e => e[0]);
 
 
-      if (this.#cache.has(raw) && (!flags || !textures.length)) {
-        this.#cache.get(raw)?.destroy();
-        this.#cache.delete(raw);
+      if (this.#cache.has(vec) && (!flags || !textures.length)) {
+        this.#cache.get(vec)?.destroy();
+        this.#cache.delete(vec);
         this.#hasChange = true;
         return;
       }
 
       const texture = randitem(textures);
-      const sprite = this.#cache.get(raw) ?? (
-        this.#cache.set(raw, (
+      const sprite = this.#cache.get(vec) ?? (
+        this.#cache.set((
           this.#hasChange = true,
           this.add(Sprite, {
             ...vec.ctimes(32),
             texture,
             anchor: .5
           })
-        )),
-        this.#cache.get(raw)!
+        ), vec),
+        this.#cache.get(vec)!
       );
 
       if (texture !== sprite.texture) {
