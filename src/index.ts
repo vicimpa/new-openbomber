@@ -27,9 +27,9 @@ Promise.resolve()
       const click = () => {
         resolve(app);
         dispose();
+        loader.style.pointerEvents = 'none';
       };
 
-      loader.style.pointerEvents = 'none';
 
       container.replaceWith(
         dom('button', {
