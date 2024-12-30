@@ -19,6 +19,30 @@ body {
   background-position: center;
 }
 
+#logo {
+  width: calc(100% - 40px);
+  max-width: 450px;
+}
+
+#progress {
+  width: calc(100% - 40px);
+  max-width: 700px;
+  border: 3px solid #fff;
+  border-radius: 10px;
+  height: 40px;
+  position: relative;
+
+  [data-layer] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transition: 0.3s;
+    background-color: #fff;
+    opacity: .4;
+  }
+}
+
 .loader {
   position: absolute;
   inset: 40px;

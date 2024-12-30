@@ -12,6 +12,11 @@ type SpritesheetDataArray = Omit<SpritesheetData, 'frames'> & {
 
 export const awaitAllTasks = () => Promise.all(tasks);
 
+export const awaitAllTasksSignal = (callback: (count: number, ammount: number) => void) => {
+  let i = 0;
+  return Promise.all(tasks.map(e => e.then(() => { callback(++i, tasks.length); })));
+};
+
 export function loadSpritesheet<const D extends SpritesheetData>(
   data: D, image: string
 ) {

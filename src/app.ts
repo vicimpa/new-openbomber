@@ -2,11 +2,13 @@ import { Game } from "$views/Game";
 import { Ground } from "$models/Ground";
 import { Viewport } from "$core/Viewport";
 import { app } from "$modules/app";
-import { awaitAllTasks } from "$library/loaders";
+import { awaitAllTasksSignal } from "$library/loaders";
 
 const loader = document.getElementById('loader')!;
+const layer: HTMLElement = document.getElementById('progress')?.querySelector('[data-layer]')!;
 
-awaitAllTasks()
+awaitAllTasksSignal((a, b) => layer.style.width = `${(a / b) * 100}%`)
+  .then(() => new Promise(resolve => setTimeout(resolve, 300)))
   .then(() => app)
   .then(app => {
     const viewport = app.stage.add(Viewport);
