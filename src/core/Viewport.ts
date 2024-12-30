@@ -12,7 +12,7 @@ export class Viewport extends Container {
   #scale = vec2(1);
 
   center = vec2(0, 0);
-  radius = innerWidth;
+  radius = 0;
   focus?: Container;
 
   shakes = new Set<{ time: number, amp: number; }>();
@@ -28,11 +28,9 @@ export class Viewport extends Container {
 
   constructor() {
     super({ isRenderGroup: true });
-  }
-
-  onMount(): void {
     app.then(app => {
       this.app = app;
+      this.radius = Vec2.fromSize(app.canvas).min();
     });
   }
 

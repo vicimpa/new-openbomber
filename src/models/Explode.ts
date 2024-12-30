@@ -2,6 +2,7 @@ import { Container, ContainerOptions, Rectangle, Sprite, Texture, Ticker } from 
 import { Vec2, vec2 } from "@vicimpa/lib-vec2";
 
 import { app } from "$modules/app";
+import { awaitAllTasks } from "$library/loaders";
 import { clamp } from "@vicimpa/math";
 import { explode } from "$resources/image";
 import { from } from "$library/array";
@@ -9,7 +10,9 @@ import { from } from "$library/array";
 const maxframe = explode.normal.length - 1;
 const helperSprite = new Sprite();
 
-const explodeNormal = app.then(app => {
+const explodeNormal = app.then(async app => {
+  await awaitAllTasks();
+
   return explode.normal.map((texture) => {
     const { source, frame } = app.renderer.generateTexture((
       helperSprite.texture = texture, helperSprite
@@ -31,8 +34,6 @@ const explodeNormal = app.then(app => {
     ));
   });
 });
-
-
 
 export type ExplodeOptions = {
   top?: number;
