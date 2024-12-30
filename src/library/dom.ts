@@ -1,6 +1,24 @@
 import { assign, entries } from "./object";
 
-type Props<E extends HTMLElement> = Partial<E> & {
+type PropsElement<E extends HTMLElement> = {
+  [K in keyof E]: E[K] extends string ? (
+    K
+  ) : E[K] extends object ? (
+    K extends 'style' ? K : never
+  ) : K extends `on${string}` ? (
+    K
+  ) : E[K] extends string ? (
+    K
+  ) : never
+}[keyof E];
+
+type Props<E extends HTMLElement> = {
+  [K in PropsElement<E>]?: K extends 'style' ? (
+    Partial<E[K]> & {
+      [_: `--${string}`]: any;
+    }
+  ) : E[K]
+} & {
   ref?: (elem: E) => void;
   appendTo?: Element;
 };
@@ -8,7 +26,7 @@ type Props<E extends HTMLElement> = Partial<E> & {
 export const dom = <K extends keyof HTMLElementTagNameMap>(
   type: K,
   props: Props<HTMLElementTagNameMap[K]> = {},
-  ...children: Element[]
+  ...children: (Node | string)[]
 ) => {
   const _elem = document.createElement(type);
   const { ref, appendTo, ..._props } = props;
@@ -24,7 +42,7 @@ export const dom = <K extends keyof HTMLElementTagNameMap>(
         if (typeof _elem[key] !== 'object')
           assign(_elem, { [key]: value });
         else if (_elem[key])
-          assign(_elem[key], { [key]: value });
+          assign(_elem[key], value as any);
       }
 
     });
@@ -32,6 +50,9 @@ export const dom = <K extends keyof HTMLElementTagNameMap>(
   ref?.(_elem);
 
   children.forEach(child => {
+    if (typeof child === 'string')
+      child = document.createTextNode(child);
+
     _elem.appendChild(child);
   });
 

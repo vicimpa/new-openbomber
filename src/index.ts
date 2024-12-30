@@ -6,6 +6,7 @@ import { Viewport } from "$core/Viewport";
 import { app } from "$modules/app";
 import { awaitAllTasksSignal } from "$library/loaders";
 import { dom } from "$library/dom";
+import { windowEvents } from "@vicimpa/events";
 
 const loader = document.getElementById('loader')!;
 const container = document.getElementById('container')!;
@@ -18,31 +19,31 @@ Promise.resolve()
   .then(() => app)
   .then((app) => {
     return new Promise<Application>((resolve) => {
+      const dispose = windowEvents('keydown', ({ code }) => {
+        if (code === 'Enter')
+          click();
+      });
+
+      const click = () => {
+        resolve(app);
+        dispose();
+      };
+
+      loader.style.pointerEvents = 'none';
+
       container.replaceWith(
         dom('button', {
           innerHTML: 'Continue',
-          onclick: resolve.bind(null, app)
+          onclick: click
         })
       );
     });
   })
   .then(app => {
-    const viewport = app.stage.add(Viewport);
+    const controller = app.stage.add(Controller);
+    const viewport = controller.add(Viewport);
     viewport.scene.add(Ground, app, { seed: 11 });
     viewport.scene.add(Game, viewport);
     loader.style.opacity = '0';
     app.canvas.style.opacity = '1';
   });
-
-const array = new Set<string>();
-addEventListener('keydown', (e) => {
-  array.add(e.code);
-  console.log(array);
-});
-
-
-const ctrl = new Controller({
-  'up': ['ArrowUp', 'KeyW']
-});
-
-console.log(ctrl.collectStates.get('up')?.());

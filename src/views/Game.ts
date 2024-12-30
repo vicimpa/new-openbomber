@@ -1,9 +1,9 @@
 import { Container, Ticker } from "pixi.js";
 import { Vec2, vec2 } from "@vicimpa/lib-vec2";
-import { isKeyDown, isKeyPress, updateAxisVec2 } from "$library/keyboard";
 
 import { Bombs } from "./Bombs";
 import { Bonuses } from "./Bonuses";
+import { Controller } from "$core/Controller";
 import { Effects } from "./Effects";
 import { Hero } from "../models/Hero";
 import { Ruines } from "../models/Ruine";
@@ -16,6 +16,8 @@ const size = vec2(17);
 const csize = size.cdiv(2).floor();
 
 export class Game extends Container {
+  ctrl?: Controller;
+
   view = this.add(Container);
   ruines = this.view.add(Ruines);
   world = this.view.add(World, generator3000(size.x, size.y, [csize]));
@@ -41,6 +43,7 @@ export class Game extends Container {
 
   onMount(): void {
     const size = Vec2.fromSize(this.world);
+    this.ctrl = Controller.resolve(this);
 
     this.viewport.radius = (size.max() + 3) * 32;
     this.player = this.heroes.add(Hero, { type: 'type8' });
@@ -58,20 +61,16 @@ export class Game extends Container {
   }
 
   onTick(ticker: Ticker): void {
-    const { player, move, bombs } = this;
+    const { player, bombs, ctrl } = this;
 
-    if (player) {
-      updateAxisVec2(move, 'KeyA', 'KeyD', 'KeyW', 'KeyS');
+    if (player && ctrl) {
 
-      if (isKeyPress('Space')) {
+      if (ctrl.isBomb()) {
         if (bombs.children.length < this.stats.append + 1)
           bombs.spawn(vec2(player), this.stats.radius + 1);
       }
 
-      player.hasBomb = isKeyDown('KeyE');
-
       const pos = vec2(player);
-
       const bonus = this.bonus.give(player);
 
       if (bonus?.type === 'append') {
@@ -96,7 +95,7 @@ export class Game extends Container {
       player.hasSpeed = this.stats.speed > 0;
       player.hasFire = this.stats.fire > 0;
 
-      move
+      ctrl.move
         .toObject(player.axis)
         .times(ticker.deltaTime)
         .times(1.5)
@@ -105,12 +104,10 @@ export class Game extends Container {
       this.bombs.updateIgnore(pos);
 
       pos
-        .plus(move)
+        .plus(ctrl.move)
         .plus(this.world.getCorrect(pos.cdiv(32)).times(32))
         .plus(this.bombs.getCorrect(pos))
         .toObject(player);
-    } else {
-      move.set(0);
     }
   }
 }

@@ -105,7 +105,7 @@ export class Hero extends Container {
     this.hero.animation = `${a}${b}${c}`;
     this.hero.start = isRun ? 1 : 0;
     this.hero.scale.x = dir === 'Left' ? -1 : 1;
-    this.hero.speed = isRun ? 0.20 * this.speedMulty : .05;
+    this.hero.speed = isRun ? 0.20 * this.speedMulty * this.axis.length() : .05;
     this.dustBack.scale.x = dir === 'Left' ? -1 : 1;
     this.dustFront.scale.x = dir === 'Left' ? -1 : 1;
     this.dustBack.texture = hasSpeed ? dust[`back${this.hero.animation}`][this.hero.frame] : Texture.EMPTY;

@@ -1,23 +1,67 @@
-import { entries } from "$library/object";
+import { Container } from "pixi.js";
+import { Gamepad } from "./Gamepad";
+import { Keyboard } from "./Keyboard";
+import { Touchscreen } from "./Touchscreen";
+import { or } from "$library/boolean";
+import { vec2 } from "@vicimpa/lib-vec2";
 
-type KEYCODE = "AltLeft" | "AltRight" | "ArrowDown" | "ArrowLeft" | "ArrowRight" | "ArrowUp" | "Backquote" | "Backslash" | "Backspace" | "BracketLeft" | "BracketRight" | "CapsLock" | "Comma" | "ControlLeft" | "Digit0" | "Digit1" | "Digit2" | "Digit3" | "Digit4" | "Digit5" | "Digit6" | "Digit7" | "Digit8" | "Digit9" | "Enter" | "Equal" | "Escape" | "F1" | "F10" | "F12" | "F2" | "F3" | "F4" | "F5" | "F6" | "F7" | "F8" | "F9" | "IntlBackslash" | "KeyA" | "KeyB" | "KeyC" | "KeyD" | "KeyE" | "KeyF" | "KeyG" | "KeyH" | "KeyI" | "KeyJ" | "KeyK" | "KeyL" | "KeyM" | "KeyN" | "KeyO" | "KeyP" | "KeyQ" | "KeyR" | "KeyS" | "KeyT" | "KeyU" | "KeyV" | "KeyW" | "KeyX" | "KeyY" | "KeyZ" | "MetaLeft" | "MetaRight" | "Minus" | "Period" | "Quote" | "Semicolon" | "ShiftLeft" | "ShiftRight" | "Slash" | "Space" | "Tab";
-type GAMEPAD = `gaxis:${number}${'' | `:${'r' | 'l'}`}` | `gbutton:${number}`;
-type TOUCHPAD = `taxis:${'t' | 'b'}${'l' | 'r'}` | `tbutton:${'t' | 'b'}${'l' | 'r'}`;
-type Action = KEYCODE | GAMEPAD | TOUCHPAD;
+export class Controller extends Container {
+  readonly move = vec2();
 
+  keys = new Keyboard({
+    up: ['ArrowUp', 'KeyW'],
+    left: ['ArrowLeft', 'KeyA'],
+    right: ['ArrowRight', 'KeyD'],
+    down: ['ArrowDown', 'KeyS'],
+    bomb: ['Space', 'Enter'],
+    take: ['KeyE']
+  });
 
-export class Controller<T extends { [key: string]: Action[]; }> {
-  state = new Map<Action, number>();
-  collectStates = new Map<keyof T, () => number>();
+  gpad = new Gamepad({
+    up: ['axis:1:-'],
+    left: ['axis:0:-'],
+    right: ['axis:0:+'],
+    down: ['axis:1:+'],
+    bomb: ['button:0']
+  }, .5);
 
-  constructor(actions: T) {
-    entries(actions)
-      .forEach(([name, actions]) => {
-        this.collectStates.set(
-          name,
-          new Function('$', `return ${actions.map(e => `($[${JSON.stringify(e)}] ?? 0)`).join('+')};`)
-            .bind(null, this.state)
-        );
-      });
+  tpad = new Touchscreen();
+
+  isBomb() {
+    const { keys, gpad, tpad } = this;
+    return or(
+      keys.press('bomb'),
+      gpad.press('bomb'),
+      tpad.press('a')
+    );
+  }
+
+  onTick() {
+    const { move, keys, gpad, tpad } = this;
+
+    move
+      .set()
+      .plus(
+        keys.axis('left', 'right'),
+        keys.axis('up', 'down')
+      )
+      .plus(
+        gpad.axis('left', 'right'),
+        gpad.axis('up', 'down')
+      )
+      .plus(
+        tpad.axis()
+      );
+
+    const l = move.length();
+
+    if (l > 1) move.normalize();
+    if (l < .3) move.set(0);
+  }
+
+  static resolve(target: Container | null): Controller | undefined {
+    if (!target) return;
+    if (target instanceof Controller) return target;
+    return this.resolve(target.parent);
   }
 }
