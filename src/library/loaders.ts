@@ -1,5 +1,5 @@
 import { assign, entries, values } from "$library/object";
-import { Assets, Rectangle, Spritesheet, SpritesheetData, SpritesheetFrameData, Texture } from "pixi.js";
+import { Assets, Rectangle, Spritesheet, SpritesheetData, SpritesheetFrameData, Texture, TextureSource } from "pixi.js";
 
 export type Frames<D extends SpritesheetData> = keyof D['frames'];
 export type SplitFrame<F, S extends string> = F extends `${infer T}${S}${string}` ? T : never;
@@ -9,6 +9,8 @@ const tasks: Promise<any>[] = [];
 type SpritesheetDataArray = Omit<SpritesheetData, 'frames'> & {
   frames: (SpritesheetFrameData & { filename: string; })[];
 };
+
+TextureSource.defaultOptions.scaleMode = 'nearest';
 
 export const awaitAllTasks = () => Promise.all(tasks);
 
