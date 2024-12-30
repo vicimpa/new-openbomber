@@ -15,9 +15,7 @@ export function cir2cir(a: Vec2, ar: number, b: Vec2, br: number) {
 }
 
 export function cir2sqr(a: Vec2, ar: number, b: Vec2, br: number) {
-  const closest = a.clone()
-    .cropMin(b.cminus(br * .5))
-    .cropMax(b.cplus(br * .5));
+  const closest = a.cclamp(b.cminus(br * .5), b.cplus(br * .5));
 
   if (a.distance(closest) >= ar)
     return null;

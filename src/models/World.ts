@@ -114,11 +114,10 @@ export class World extends Container {
 
   getCorrect(pos: Vec2) {
     const correct = vec2();
-    pos = pos.cround();
 
     for (let x = -1; x <= 1; x++) {
       for (let y = -1; y <= 1; y++) {
-        const tpos = pos.cplus(x, y);
+        const tpos = pos.cround().plus(x, y);
         const tile = this.getTile(tpos);
         if (!tile || tile === 'grass' || tile === 'grass2')
           continue;
