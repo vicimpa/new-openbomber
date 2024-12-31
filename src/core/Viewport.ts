@@ -37,10 +37,13 @@ export class Viewport extends Container {
   shake(target: Container, pos = vec2()) {
     const dis = vec2(target.toLocal(pos, this.scene)).distance(this.center);
     const sdis = clamp(dis, 24, Infinity) ** 2;
+    const amp = 256 / sdis * 128;
     this.shakes.add({
       time: 0,
-      amp: 256 / sdis * 128
+      amp
     });
+
+    navigator.vibrate([clamp(amp * 3, 0, 100), 5, clamp(amp * 3, 0, 100)]);
     return target;
   }
 

@@ -44,7 +44,7 @@ export const GamePad = ({ show: _show, buttons, onAxisChange, onButtonChange }: 
     const dispose = [
       elementEvents(axis, 'touchstart',
         makeDrag<[element: HTMLDivElement]>((_, element) => {
-          navigator.vibrate?.(10);
+          navigator.vibrate(10);
           return ({ current }) => {
             const rect = element.getBoundingClientRect();
             const size = Vec2.fromSize(rect).cdiv(2);
@@ -75,7 +75,7 @@ export const GamePad = ({ show: _show, buttons, onAxisChange, onButtonChange }: 
               + `translateY(${pos.y * size.y}px) `
             );
             return () => {
-              navigator.vibrate?.(5);
+              navigator.vibrate(5);
               delete element.dataset['down'];
               axisUpdate(vec2());
               if (!axisPoint.current) return;
@@ -89,11 +89,11 @@ export const GamePad = ({ show: _show, buttons, onAxisChange, onButtonChange }: 
         elementEvents(ref, 'touchstart',
           makeDrag<[element: HTMLDivElement]>((_, button) => {
             onButtonChange?.(i, true);
-            navigator.vibrate?.(10);
+            navigator.vibrate(10);
             button.dataset['down'] = '';
             return () => {
               return () => {
-                navigator.vibrate?.(5);
+                navigator.vibrate(5);
                 onButtonChange?.(i, false);
                 delete button.dataset['down'];
               };

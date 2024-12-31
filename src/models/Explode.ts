@@ -128,6 +128,10 @@ export class Explode extends Container {
     };
   }
 
+  onMount(): void {
+    navigator.vibrate?.(10);
+  }
+
   onTick({ deltaTime }: Ticker): void {
     this.__time += deltaTime * this.__speed;
 

@@ -2,6 +2,38 @@ import { clamp } from "@vicimpa/math";
 import { keys } from "../library/object";
 
 const data: { [K: string]: { axis: number[], button: number[]; }; } = {};
+const vibrate = navigator.vibrate?.bind(navigator) ?? (() => false);
+
+navigator.vibrate = (arg: number[]) => {
+  const value = vibrate(arg);
+
+  if (typeof arg === 'number')
+    arg = [arg];
+
+  const gamepads = navigator.getGamepads();
+
+  // Проходим по каждому геймпаду
+  for (let i = 0; i < gamepads.length; i++) {
+    const gamepad = gamepads[i];
+
+    if (gamepad && gamepad.vibrationActuator) {
+      // Проходим по каждому элементу в паттерне вибрации
+      arg.forEach((duration, index) => {
+        // Используем setTimeout для управления временем вибрации
+        setTimeout(() => {
+          // Включаем вибрацию
+          gamepad.vibrationActuator.playEffect("dual-rumble", {
+            startDelay: 0,
+            duration: duration,
+            weakMagnitude: 1.0,
+            strongMagnitude: 1.0
+          });
+        }, arg.slice(0, index).reduce((a, b) => a + b, 0));
+      });
+    }
+  }
+  return value;
+};
 
 class GpadEvent extends Event {
   constructor(

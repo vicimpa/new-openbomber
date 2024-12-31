@@ -36,6 +36,10 @@ export class Bomb extends Container {
     });
   }
 
+  onMount(): void {
+    navigator.vibrate(10);
+  }
+
   onTick(ticker: Ticker): void {
     if (!this.#hasRun) return;
     this.time -= ticker.deltaMS;
