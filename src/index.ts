@@ -1,6 +1,6 @@
 import { Application } from "pixi.js";
 import { Controller } from "$core/Controller";
-import { Game } from "$views/Game";
+import { Game } from "$view/Game";
 import { Ground } from "$models/Ground";
 import { Viewport } from "$core/Viewport";
 import { app } from "$modules/app";
@@ -19,17 +19,28 @@ Promise.resolve()
   .then(() => app)
   .then((app) => {
     return new Promise<Application>((resolve) => {
-      const dispose = windowEvents('keydown', ({ code }) => {
-        if (code === 'Enter')
-          click();
-      });
-
       const click = () => {
-        resolve(app);
-        dispose();
+        dispose.forEach(call => call());
         loader.style.pointerEvents = 'none';
+        resolve(app);
       };
 
+      const dispose = [
+        windowEvents('keydown', (e) => {
+          if (e.code === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            click();
+          }
+        }),
+        windowEvents('gpad:button', (e) => {
+          if (e.button === 0 && e.down) {
+            e.preventDefault();
+            e.stopPropagation();
+            click();
+          }
+        })
+      ];
 
       container.replaceWith(
         dom('button', {

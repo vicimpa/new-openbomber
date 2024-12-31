@@ -10,6 +10,26 @@ export class Keyboard<T extends { [key: string]: string[]; }> {
   private _state = new Set<string>();
   private _checked = new Set<keyof T>();
   private _collect = new Map<keyof T, () => boolean>();
+  private _remap() {
+    entries(this._config ?? this._base)
+      .map(([name, keys]) => {
+        const codes = keys.map(key => (
+          `$.has(${JSON.stringify(key)})`
+        ));
+
+        this._collect.set(
+          name,
+          new Function(
+            '$',
+            `return ${codes.join(' || ')};`
+          ).bind(null, this._state)
+        );
+
+        keys.map(key => {
+          this._keys.set(key, name);
+        });
+      });
+  }
   private _destroy = [
     windowEvents('keydown', ({ code, ctrlKey, altKey, metaKey }) => {
       if (this._isresolved) return;
@@ -27,30 +47,6 @@ export class Keyboard<T extends { [key: string]: string[]; }> {
 
   get config(): Readonly<T> {
     return this._base;
-  }
-
-  resolve() {
-    if (this._isresolved)
-      return Promise.resolve(null);
-
-    this._isresolved = true;
-    this._state.clear();
-
-    return new Promise<string | null>((resolve) => {
-      const dispose = windowEvents('keydown', (e) => {
-        try {
-          e.preventDefault();
-          if (e.code === 'ESC')
-            return resolve(null);
-
-          resolve(e.code);
-        } finally {
-          dispose();
-        }
-      });
-    }).finally(() => {
-      this._isresolved = false;
-    });
   }
 
   down(key: keyof T) {
@@ -77,24 +73,7 @@ export class Keyboard<T extends { [key: string]: string[]; }> {
   configure(config: T) {
     this._config = config;
     this._keys.clear();
-    entries(this._config ?? this._base)
-      .map(([name, keys]) => {
-        const codes = keys.map(key => (
-          `$.has(${JSON.stringify(key)})`
-        ));
-
-        this._collect.set(
-          name,
-          new Function(
-            '$',
-            `return ${codes.join(' || ')};`
-          ).bind(null, this._state)
-        );
-
-        keys.map(key => {
-          this._keys.set(key, name);
-        });
-      });
+    this._remap();
   }
 
   destroy() {
@@ -105,5 +84,4 @@ export class Keyboard<T extends { [key: string]: string[]; }> {
     this._base = config;
     this.configure(config);
   }
-
 }

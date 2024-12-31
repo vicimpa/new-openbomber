@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import paths from "vite-tsconfig-paths";
+import preact from '@preact/preset-vite';
 
 export default defineConfig({
   root: './src',
@@ -13,6 +14,7 @@ export default defineConfig({
   },
   plugins: [
     paths({ root: '..' }),
+    preact(),
   ],
   server: {
     host: '0.0.0.0',

@@ -57,9 +57,6 @@ export class Game extends Container {
 
     this.viewport.focus = this.player;
     this.viewport.radius = 256;
-
-    this.ctrl?.gpad.resolve()
-      .then(console.log);
   }
 
   onTick(ticker: Ticker): void {

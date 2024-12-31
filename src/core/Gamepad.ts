@@ -1,22 +1,57 @@
-import { abs, clamp } from "@vicimpa/math";
-
+import { abs } from "@vicimpa/math";
 import { entries } from "$library/object";
-import { frames } from "$library/frames";
+import gpads from "$modules/gpads";
 import { nextTick } from "$library/utils";
+import { windowEvents } from "@vicimpa/events";
 
 type GamepadOption = `axis:${number}:${'+' | '-'}` | `button:${number}`;
 
-export class Gamepad<T extends { [key: string]: GamepadOption[]; }> extends EventTarget {
-  _base!: T;
-  _custom: { [key: string]: T; } = {};
-  _gamepadsState = new Map<string, Record<string, number>>();
-  _collect = new Map<keyof T, () => number>();
-  _checked = new Set<keyof T>();
-  _resolve?: (key: string) => void;
-  _destroy = [
-    frames(() => {
-      this.process();
-    })
+export class Gamepad<T extends { [key: string]: GamepadOption[]; }> {
+  private _nt = nextTick(() => { });
+  private _base!: T;
+  private _custom: { [key: string]: T; } = {};
+  private _gamepadsState = new Map<string, Record<GamepadOption, number>>();
+  private _collect = new Map<keyof T, () => number>();
+  private _checked = new Set<keyof T>();
+  private _getctrl(id: string) {
+    return this._gamepadsState.get(id) ?? (
+      this._gamepadsState.set(id, {}),
+      this._remap(),
+      this._gamepadsState.get(id)!
+    );
+  }
+  private _remap() {
+    this._nt();
+    this._nt = nextTick(() => {
+      this._collect.clear();
+      entries(this._base)
+        .forEach(([name, keys]) => {
+          const cfg = [...this._gamepadsState]
+            .map(([id, state]): () => number => {
+              const current = this._custom[id]?.[name] ?? keys;
+              const codes = current.map(e => `($[${JSON.stringify(e)}] ?? 0)`);
+              return new Function('$', `return ${codes.join(' + ')};`).bind(null, state);
+            });
+
+          const code = cfg.map((_, i) => `($[${JSON.stringify(i)}]?.() ?? 0)`);
+
+          this._collect.set(
+            name,
+            new Function('$', `return ${code.join(' + ')};`).bind(null, cfg)
+          );
+        });
+    });
+  }
+  private _destroy: (() => void)[] = [
+    windowEvents('gpad:axis', (e) => {
+      const state = this._getctrl(e.id);
+      state[`axis:${e.axis}:+`] = e.high;
+      state[`axis:${e.axis}:-`] = e.low;
+    }),
+    windowEvents('gpad:button', (e) => {
+      const state = this._getctrl(e.id);
+      state[`button:${e.button}`] = e.value;
+    }),
   ];
 
   down(key: keyof T) {
@@ -37,45 +72,12 @@ export class Gamepad<T extends { [key: string]: GamepadOption[]; }> extends Even
     return false;
   }
 
-  nt = nextTick(() => { });
-  _remap() {
-    this.nt();
-    this.nt = nextTick(() => {
-      this._collect.clear();
-      entries(this._base)
-        .forEach(([name, keys]) => {
-          const cfg = [...this._gamepadsState]
-            .map(([id, state]): () => number => {
-              const current = this._custom[id]?.[name] ?? keys;
-              const codes = current.map(e => `($[${JSON.stringify(e)}] ?? 0)`);
-              return new Function('$', `return ${codes.join(' + ')};`).bind(null, state);
-            });
-
-          const code = cfg.map((_, i) => `($[${JSON.stringify(i)}]?.() ?? 0)`);
-
-          this._collect.set(
-            name,
-            new Function('$', `return ${code.join(' + ')};`).bind(null, cfg)
-          );
-        });
-    });
-  }
-
   constructor(base: T, public acc = .5) {
-    super();
     this._base = base;
-    this._remap();
-  }
-
-  resolve() {
-    if (this._resolve)
-      return Promise.resolve(null);
-
-    return new Promise<string>((resolve) => {
-      this._resolve = resolve;
-    }).finally(() => {
-      delete this._resolve;
+    gpads.ids().forEach(id => {
+      this._gamepadsState.set(id, {});
     });
+    this._remap();
   }
 
   config(id: string) {
@@ -94,56 +96,5 @@ export class Gamepad<T extends { [key: string]: GamepadOption[]; }> extends Even
 
   destroy() {
     this._destroy.forEach(call => call());
-  }
-
-  process() {
-    const gps = new Set<string>();
-
-    navigator.getGamepads()
-      .forEach((gp) => {
-        if (!gp) return;
-        const state = this._gamepadsState.get(gp.id) ?? (
-          this._remap(),
-          this._gamepadsState.set(gp.id, {}),
-          this._gamepadsState.get(gp.id)
-        );
-
-        if (!state) return;
-
-        gps.add(gp.id);
-
-        gp.axes.forEach((val, i) => {
-          const lvk = `axis:${i}:-`;
-          const rvk = `axis:${i}:+`;
-          const lv = clamp(val, -1, 0) * -1;
-          const rv = clamp(val, 0, 1);
-
-          if (this._resolve) {
-            if (lv > .5) this._resolve(lvk);
-            if (rv > .5) this._resolve(rvk);
-            return;
-          }
-
-          state[lvk] = lv;
-          state[rvk] = rv;
-        });
-
-        gp.buttons.forEach(({ value }, i) => {
-          const btk = `button:${i}`;
-
-          if (this._resolve) {
-            if (value) this._resolve(btk);
-            return;
-          }
-
-          state[btk] = clamp(value, 1, 0);
-        });
-      });
-
-    this._gamepadsState.forEach((_, id) => {
-      if (gps.has(id)) return;
-      this._remap();
-      this._gamepadsState.delete(id);
-    });
   }
 }
