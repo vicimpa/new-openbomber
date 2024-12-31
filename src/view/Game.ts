@@ -33,6 +33,7 @@ export class Game extends Container {
   player?: Hero;
 
   move = vec2();
+  clear = false;
 
   stats = {
     append: 0,
@@ -46,6 +47,18 @@ export class Game extends Container {
     super();
   }
 
+  restart() {
+    delete this.viewport.focus;
+    this.viewport.center.set(0);
+    navigator.vibrate(50);
+    this.viewport.radius = (size.max() + 4) * 32;
+
+    setTimeout(() => {
+      this.parent.add(Game, this.viewport);
+      this.destroy();
+    }, 3000);
+  }
+
   death() {
     if (!this.player) return;
     if (this.stats.shield > 0) {
@@ -54,22 +67,12 @@ export class Game extends Container {
     }
     const { player } = this;
     const pos = vec2(player);
-    delete this.viewport.focus;
     delete this.player;
-    this.viewport.center.set(0);
     nextTick(() => {
       this.fx.fire(player, pos);
       player.destroy();
     });
-
-    navigator.vibrate(50);
-    this.viewport.radius = (size.max() + 4) * 32;
-
-
-    setTimeout(() => {
-      this.parent.add(Game, this.viewport);
-      this.destroy();
-    }, 3000);
+    this.restart();
   }
 
   onMount(): void {
@@ -92,11 +95,18 @@ export class Game extends Container {
   onTick(ticker: Ticker): void {
     const { player, bombs, ctrl } = this;
 
+    if (!this.clear && this.world.isClear()) {
+      this.clear = true;
+      this.restart();
+    }
+
     if (player && ctrl) {
       if (ctrl.isBomb()) {
         if (bombs.children.length < this.stats.append + 1)
           bombs.spawn(vec2(player), this.stats.radius + 1);
       }
+
+      player.hasBomb = ctrl.hasBomb() || this.clear;
 
       const pos = vec2(player);
       const bonus = this.bonus.give(player);

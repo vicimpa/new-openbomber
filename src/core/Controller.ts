@@ -22,7 +22,8 @@ export class Controller extends Container {
     left: ['axis:0:-'],
     right: ['axis:0:+'],
     down: ['axis:1:+'],
-    bomb: ['button:0']
+    bomb: ['button:0'],
+    take: ['button:1']
   }, .5);
 
   tpad = new Touchscreen();
@@ -33,6 +34,15 @@ export class Controller extends Container {
       keys.press('bomb'),
       gpad.press('bomb'),
       tpad.press('a')
+    );
+  }
+
+  hasBomb() {
+    const { keys, gpad, tpad } = this;
+    return or(
+      keys.down('take'),
+      gpad.down('take'),
+      tpad.down('b')
     );
   }
 

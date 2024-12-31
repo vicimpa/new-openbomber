@@ -24,6 +24,15 @@ export class World extends Container {
     return this.#height;
   }
 
+  isClear() {
+    for (const [_, tile] of this.#data) {
+      if (tile === 'box')
+        return false;
+    }
+
+    return true;
+  }
+
   constructor(data: Tile[][]) {
     super();
     this.setData(data);
