@@ -62,7 +62,7 @@ export class Game extends Container {
       player.destroy();
     });
 
-    navigator.vibrate([5, 5, 10, 5, 5, 10]);
+    navigator.vibrate(50);
     this.viewport.radius = (size.max() + 4) * 32;
 
 
