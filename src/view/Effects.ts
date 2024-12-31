@@ -63,6 +63,16 @@ export class Effects extends Container {
             });
             break;
           }
+
+          const bonus = this.game.bonus.get(tpos.ctimes(32));
+          if (bonus) {
+            destroy.push(() => {
+              if (bonus instanceof Bonus) {
+                this.fire(bonus, tpos.ctimes(32));
+              }
+              bonus.destroy();
+            });
+          }
         }
 
         return i;
@@ -85,16 +95,6 @@ export class Effects extends Container {
             if (pos.distance(point.cdiv(32)) < .5) {
               this.game.death();
             }
-          }
-
-          const bonus = this.game.bonus.get(point);
-          if (bonus) {
-            destroy.push(() => {
-              if (bonus instanceof Bonus) {
-                this.fire(bonus, point);
-              }
-              bonus.destroy();
-            });
           }
         });
         if (!pow) return;
