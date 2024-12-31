@@ -63,25 +63,6 @@ export class Effects extends Container {
             });
             break;
           }
-
-          const bonus = this.game.bonus.get(tpos.ctimes(32));
-          if (bonus) {
-            destroy.push(() => {
-              if (bonus instanceof Bonus) {
-                this.fire(bonus, tpos.ctimes(32));
-              }
-              bonus.destroy();
-            });
-          }
-
-          destroy.push(() => {
-            if (this.game.player) {
-              const pos = vec2(this.game.player).div(32);
-              if (pos.distance(tpos) < .5) {
-                this.game.death();
-              }
-            }
-          });
         }
 
         return i;
@@ -98,6 +79,23 @@ export class Effects extends Container {
         destroy.forEach(e => e());
         points.forEach(point => {
           this.game.ruines.set(point.cdiv(32));
+
+          if (this.game.player) {
+            const pos = vec2(this.game.player).div(32);
+            if (pos.distance(point.cdiv(32)) < .5) {
+              this.game.death();
+            }
+          }
+
+          const bonus = this.game.bonus.get(point);
+          if (bonus) {
+            destroy.push(() => {
+              if (bonus instanceof Bonus) {
+                this.fire(bonus, point);
+              }
+              bonus.destroy();
+            });
+          }
         });
         if (!pow) return;
         this.game.viewport.shake(explode);
