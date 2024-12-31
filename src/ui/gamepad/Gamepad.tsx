@@ -1,8 +1,9 @@
-import { Signal, useSignalEffect } from "@preact/signals";
+import { Signal, useComputed, useSignal, useSignalEffect } from "@preact/signals";
 import { Vec2, vec2 } from "@vicimpa/lib-vec2";
 import { useMemo, useRef } from "preact/hooks";
 
 import { elementEvents } from "@vicimpa/events";
+import { frames } from "$library/frames";
 import { from } from "$library/array";
 import { makeDrag } from "@vicimpa/easy-drag";
 import s from "./Gamepad.module.css";
@@ -14,7 +15,8 @@ export type GamePadProps = {
   onButtonChange?: (btn: number, pressed: boolean) => any;
 };
 
-export const GamePad = ({ show, buttons, onAxisChange, onButtonChange }: GamePadProps) => {
+export const GamePad = ({ show: _show, buttons, onAxisChange, onButtonChange }: GamePadProps) => {
+  const touches = useSignal(false);
   const axis = useRef<HTMLDivElement>(null);
   const axisPoint = useRef<HTMLDivElement>(null);
   const btns = from(buttons, () => useRef<HTMLDivElement>(null));
@@ -24,6 +26,17 @@ export const GamePad = ({ show, buttons, onAxisChange, onButtonChange }: GamePad
       onAxisChange?.(pos);
     preview.set(pos);
   };
+  const show = useComputed(() => _show.value && touches.value);
+
+  useSignalEffect(() => {
+    if (!_show.value) return;
+    return frames(() => {
+      if (touches.peek() && !navigator.maxTouchPoints)
+        touches.value = false;
+      if (!touches.peek() && navigator.maxTouchPoints)
+        touches.value = true;
+    });
+  });
 
   useSignalEffect(() => {
     if (!show.value) return;
