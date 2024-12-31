@@ -15,6 +15,7 @@ body {
   color: #fff;
   font-family: 'PublicPixel';
   user-select: none;
+  -webkit-user-select: none;
 }
 
 body {
