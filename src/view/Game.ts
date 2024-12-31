@@ -48,6 +48,10 @@ export class Game extends Container {
 
   death() {
     if (!this.player) return;
+    if (this.stats.shield > 0) {
+      this.stats.shield = 0;
+      return;
+    }
     const { player } = this;
     const pos = vec2(player);
     delete this.viewport.focus;
