@@ -45,26 +45,27 @@ export class Game extends Container {
     const size = Vec2.fromSize(this.world);
     this.ctrl = Controller.resolve(this);
 
-    this.viewport.radius = (size.max() + 3) * 32;
-    this.player = this.heroes.add(Hero, { type: 'type8' });
-
-    size
+    const pos = size
       .cdiv(-2)
       .ceil()
       .times(32)
       .toObject(this.view)
-      .times(-1)
-      .toObject(this.player);
+      .times(-1);
+
+    this.viewport.radius = (size.max() + 3) * 32;
+    this.player = this.heroes.add(Hero, { type: 'type8', ...pos });
 
     this.viewport.focus = this.player;
     this.viewport.radius = 256;
+
+    this.ctrl?.gpad.resolve()
+      .then(console.log);
   }
 
   onTick(ticker: Ticker): void {
     const { player, bombs, ctrl } = this;
 
     if (player && ctrl) {
-
       if (ctrl.isBomb()) {
         if (bombs.children.length < this.stats.append + 1)
           bombs.spawn(vec2(player), this.stats.radius + 1);
