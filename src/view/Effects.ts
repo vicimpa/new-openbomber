@@ -42,7 +42,7 @@ export class Effects extends Container {
             i++;
             destroy.push(() => {
               this.add(Destroy, world.box, tpos.ctimes(32), ddir.normalize());
-              if (random() > .3) {
+              if (random() > .8) {
                 this.game.bonus.spawn(tpos.ctimes(32));
               }
               this.game.world.delTile(tpos);
@@ -73,6 +73,15 @@ export class Effects extends Container {
               bonus.destroy();
             });
           }
+
+          destroy.push(() => {
+            if (this.game.player) {
+              const pos = vec2(this.game.player).div(32);
+              if (pos.distance(tpos) < .5) {
+                this.game.death();
+              }
+            }
+          });
         }
 
         return i;

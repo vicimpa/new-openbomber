@@ -26,6 +26,11 @@ export class World extends Container {
 
   constructor(data: Tile[][]) {
     super();
+    this.setData(data);
+    this.cacheAsTexture(true);
+  }
+
+  setData(data: Tile[][]) {
     this.#width = 0;
     this.#height = data.length;
 
@@ -45,8 +50,6 @@ export class World extends Container {
       this.setTile(-1, y, 'wall');
       this.setTile(this.#width, y, 'wall');
     }
-
-    this.cacheAsTexture(true);
   }
 
   onUnmount(): void {
@@ -108,7 +111,7 @@ export class World extends Container {
   }
 
   clearTile() {
-    this.#data.clear();
+    this.#data = new Vec2Map<Tile>();
     this.quieUpdate();
   }
 
