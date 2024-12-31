@@ -62,6 +62,7 @@ export const GamePad = ({ show, buttons, onAxisChange, onButtonChange }: GamePad
               + `translateY(${pos.y * size.y}px) `
             );
             return () => {
+              navigator.vibrate?.(5);
               delete element.dataset['down'];
               axisUpdate(vec2());
               if (!axisPoint.current) return;
@@ -79,6 +80,7 @@ export const GamePad = ({ show, buttons, onAxisChange, onButtonChange }: GamePad
             button.dataset['down'] = '';
             return () => {
               return () => {
+                navigator.vibrate?.(5);
                 onButtonChange?.(i, false);
                 delete button.dataset['down'];
               };
