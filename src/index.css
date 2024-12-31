@@ -140,6 +140,7 @@ button:active {
   .buttons {
     width: calc(var(--size) * 3);
     height: calc(var(--size) * 3);
+    flex-shrink: 0;
   }
 
   .axis {
@@ -150,6 +151,7 @@ button:active {
     align-items: center;
     justify-content: center;
     opacity: 0;
+    margin-left: 20px;
 
     &.active {
       pointer-events: visible;
@@ -167,10 +169,11 @@ button:active {
   }
 
   .buttons {
+    --offset: -10;
     position: relative;
+    margin-right: 20px;
 
     &>div {
-      --offset: -5;
       width: var(--size);
       height: var(--size);
       background-color: #999;
@@ -179,7 +182,7 @@ button:active {
       margin: auto;
       border-radius: 100%;
       opacity: 0;
-      transition: .3s;
+      transition: opacity .3s;
 
       &.active {
         pointer-events: visible;

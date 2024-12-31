@@ -1,11 +1,11 @@
 import { Vec2, vec2 } from "@vicimpa/lib-vec2";
 import { abs, clamp } from "@vicimpa/math";
 import { body, dom } from "$library/dom";
+import { elementEvents, windowEvents } from "@vicimpa/events";
 import { keys, values } from "$library/object";
 
 import { frames } from "$library/frames";
 import { nextTick } from "$library/utils";
-import { windowEvents } from "@vicimpa/events";
 
 export class Touchscreen {
   private _axis = vec2();
@@ -16,6 +16,7 @@ export class Touchscreen {
   private _last = vec2();
   private _eaxis?: HTMLDivElement;
   private _eaxisPipka?: HTMLDivElement;
+  private _btns?: HTMLDivElement;
   private _ebuttons: {
     a?: HTMLDivElement,
     b?: HTMLDivElement,
@@ -27,6 +28,7 @@ export class Touchscreen {
 
   private _axisTime = performance.now();
   private _buttonsTime = performance.now();
+  private _events: (() => void)[] = [];
 
   constructor(public acc = .3) { }
 
@@ -85,10 +87,7 @@ export class Touchscreen {
     dom('div', { className: 'container' },
       dom('div', {
         className: 'axis',
-        ref: el => { this._eaxis = el; },
-        ontouchstart: e => {
-          this.touchAxis(e);
-        }
+        ref: el => { this._eaxis = el; }
       },
         dom('div', {
           ref: el => { this._eaxisPipka = el; },
@@ -98,9 +97,7 @@ export class Touchscreen {
     dom('div', { className: 'container' },
       dom('div', {
         className: 'buttons',
-        ontouchstart: e => {
-          this.touchButton(e);
-        }
+        ref: el => { this._btns = el; }
       },
         dom('div', { ref: el => { this._ebuttons.a = el; } }),
         dom('div', { ref: el => { this._ebuttons.b = el; } }),
@@ -206,5 +203,21 @@ export class Touchscreen {
     this.processSize();
     this.processAxis();
     this.processHidden();
+
+    if (this._touches && !this._events.length) {
+      this._events = [
+        elementEvents(this._eaxis, 'touchstart', (e) => {
+          this.touchAxis(e);
+        }),
+        elementEvents(this._btns, 'touchstart', (e) => {
+          this.touchButton(e);
+        })
+      ];
+    }
+
+    if (!this._touches && this._events.length) {
+      this._events.forEach(call => call());
+      this._events = [];
+    }
   }
 }
