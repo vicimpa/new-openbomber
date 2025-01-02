@@ -1,5 +1,5 @@
 import { Container, Sprite, Texture } from "pixi.js";
-import { Vec2, Vec2Map, vec2 } from "@vicimpa/lib-vec2";
+import { Vec2, Vec2Args, Vec2Map, vec2 } from "@vicimpa/lib-vec2";
 
 import { cir2sqr } from "$library/collides";
 import { max } from "@vicimpa/math";
@@ -102,17 +102,17 @@ export class World extends Container {
     });
   }
 
-  getTile(...args: Parameters<Vec2Map<Tile>['get']>) {
+  getTile(...args: Vec2Args) {
     return this.#data.get(...args) ?? '';
   }
 
-  delTile(...args: Parameters<Vec2Map<Tile>['delete']>) {
+  delTile(...args: Vec2Args) {
     if (this.#data.delete(...args))
       this.quieUpdate();
   }
 
-  setTile(...args: Parameters<Vec2Map<Tile>['set']>) {
-    const vec = args.slice(0, -1) as Parameters<Vec2Map<Tile>['get']>;
+  setTile(...args: [...Vec2Args, value: Tile]) {
+    const vec = args.slice(0, -1) as Vec2Args;
     const tile = args.at(-1) as Tile;
     if (this.#data.get(...vec) !== tile)
       this.quieUpdate();
@@ -131,7 +131,7 @@ export class World extends Container {
       for (let y = -1; y <= 1; y++) {
         const tpos = pos.cround().plus(x, y);
         const tile = this.getTile(tpos);
-        if (!tile || tile === 'grass' || tile === 'grass2')
+        if (tile !== 'box' && tile !== 'wall')
           continue;
         const cor = cir2sqr(pos, .25, tpos, 1);
         cor && correct.plus(cor);

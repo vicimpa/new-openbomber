@@ -31,7 +31,7 @@ export class Destroy extends Container {
     position: Vec2,
     dir = vec2(0, 0)
   ) {
-    super(position.p);
+    super({ ...position });
     this._points = getPoints(texture, dir);
     this._points.forEach(({ object }) => {
       this.addChild(object);

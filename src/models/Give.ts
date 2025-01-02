@@ -10,7 +10,7 @@ export class Give extends Container {
   private __speed = .02;
 
   constructor(texture: Texture, position: Vec2) {
-    super(position.p);
+    super({ ...position });
 
     this.__view = this.add(Sprite, {
       texture,

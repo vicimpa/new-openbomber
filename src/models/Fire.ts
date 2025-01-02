@@ -17,7 +17,7 @@ export class Fire extends Container {
     position: Vec2,
     flipX = false
   ) {
-    super(position.p);
+    super({ ...position });
     this.__container = this.add(Container);
 
     this.__sprite = this.__container.add(Sprite, {
