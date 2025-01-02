@@ -1,5 +1,5 @@
 import { Container, Sprite } from "pixi.js";
-import { Vec2, Vec2ArgsReq, Vec2Map, Vec2Set } from "@vicimpa/lib-vec2";
+import { Vec2, Vec2Map, Vec2Set } from "@vicimpa/lib-vec2";
 import { entries, values } from "$library/object";
 
 import { TerrainDirs } from "$library/terrain";
@@ -20,11 +20,11 @@ export class Ruines extends Container {
     this.cacheAsTexture(true);
   }
 
-  has(...args: Vec2ArgsReq) {
+  has(...args: Parameters<Vec2Set['has']>) {
     return this.#data.has(...args);
   }
 
-  set(...args: Vec2ArgsReq) {
+  set(...args: Parameters<Vec2Set['add']>) {
     if (!this.#data.has(...args))
       this.#changes.add(...args);
 
@@ -32,7 +32,7 @@ export class Ruines extends Container {
     this.quieUpdate();
   }
 
-  del(...args: Vec2ArgsReq) {
+  del(...args: Parameters<Vec2Set['delete']>) {
     if (this.#data.has(...args))
       this.#changes.add(...args);
 
@@ -83,7 +83,7 @@ export class Ruines extends Container {
         this.#cache.set(vec, (
           this.#hasChange = true,
           this.add(Sprite, {
-            ...vec.ctimes(32),
+            ...vec.ctimes(32).p,
             texture,
             anchor: .5
           })

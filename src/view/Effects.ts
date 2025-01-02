@@ -80,7 +80,7 @@ export class Effects extends Container {
     }
 
     this.add(Explode, {
-      ...pos,
+      ...pos.p,
       top,
       left,
       right,

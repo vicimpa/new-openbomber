@@ -1,5 +1,5 @@
 import { Container, Sprite, Texture } from "pixi.js";
-import { Vec2, Vec2ArgsReq, Vec2Map, vec2 } from "@vicimpa/lib-vec2";
+import { Vec2, Vec2Map, vec2 } from "@vicimpa/lib-vec2";
 
 import { cir2sqr } from "$library/collides";
 import { max } from "@vicimpa/math";
@@ -66,14 +66,14 @@ export class World extends Container {
   }
 
   update() {
-    this.#cache.forEach((vec, sprite) => {
+    this.#cache.forEach((sprite, vec) => {
       if (!this.#data.has(vec)) {
         sprite?.destroy();
         this.#hasChange = true;
       }
     });
 
-    this.#data.forEach((vec, tile) => {
+    this.#data.forEach((tile, vec) => {
       const texture = tile === '' ? Texture.EMPTY : world[tile];
       const sprite = this.#cache.get(vec) ?? (
         this.#hasChange = true,
@@ -102,21 +102,21 @@ export class World extends Container {
     });
   }
 
-  getTile(...args: Vec2ArgsReq) {
+  getTile(...args: Parameters<Vec2Map<Tile>['get']>) {
     return this.#data.get(...args) ?? '';
   }
 
-  delTile(...args: Vec2ArgsReq) {
+  delTile(...args: Parameters<Vec2Map<Tile>['delete']>) {
     if (this.#data.delete(...args))
       this.quieUpdate();
   }
 
-  setTile(...args: [...Vec2ArgsReq, Tile]) {
-    const vec = args.slice(0, -1) as Vec2ArgsReq;
+  setTile(...args: Parameters<Vec2Map<Tile>['set']>) {
+    const vec = args.slice(0, -1) as Parameters<Vec2Map<Tile>['get']>;
     const tile = args.at(-1) as Tile;
     if (this.#data.get(...vec) !== tile)
       this.quieUpdate();
-    this.#data.set(...vec, tile);
+    this.#data.set(...args);
   }
 
   clearTile() {

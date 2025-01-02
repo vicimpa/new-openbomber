@@ -25,7 +25,7 @@ export class Bombs extends Container {
       return;
 
     this.add(Bomb, {
-      ...pos,
+      ...pos.p,
       time: 2000,
       onDelete: () => {
         this.game.fx.explode(pos, pow);

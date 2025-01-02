@@ -30,7 +30,7 @@ export class Bonuses extends Container {
 
   spawn(pos: Vec2) {
     this.add(Bonus, {
-      ...pos,
+      ...pos.p,
       type: randitem(['append', 'radius', 'speed', 'fire', 'shield'] as const)
     });
   }

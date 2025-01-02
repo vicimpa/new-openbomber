@@ -86,7 +86,7 @@ export class Game extends Container {
       .times(-1);
 
     this.viewport.radius = (size.max() + 3) * 32;
-    this.player = this.heroes.add(Hero, { type: randitem(keys(heroes)), ...pos });
+    this.player = this.heroes.add(Hero, { type: randitem(keys(heroes)), ...pos.p });
 
     this.viewport.focus = this.player;
     this.viewport.radius = 256;

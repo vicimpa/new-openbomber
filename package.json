@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@preact/signals": "^2.0.0",
-    "@types/node": "^22.10.2",
+    "@types/node": "^22.10.3",
     "@vicimpa/easy-drag": "^0.1.7",
     "@vicimpa/events": "^0.0.11",
-    "@vicimpa/lib-vec2": "^0.3.3",
+    "@vicimpa/lib-vec2": "^0.4.5",
     "@vicimpa/math": "^0.0.9",
     "@vicimpa/perlin-noise": "^0.0.7",
     "pixi.js": "^8.6.6",

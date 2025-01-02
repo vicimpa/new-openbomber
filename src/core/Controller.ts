@@ -50,7 +50,7 @@ export class Controller extends Container {
     const { move, keys, gpad, tpad } = this;
 
     move
-      .set()
+      .set(0)
       .plus(
         keys.axis('left', 'right'),
         keys.axis('up', 'down')
