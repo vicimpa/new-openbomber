@@ -8,4 +8,6 @@ export const app = _app.init({
   canvas: dom('canvas', { appendTo: body() }),
   resizeTo: body(),
   backgroundAlpha: 0,
+  roundPixels: true,
+  antialias: false,
 }).then(() => _app);

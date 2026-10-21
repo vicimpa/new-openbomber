@@ -11,6 +11,7 @@ type SpritesheetDataArray = Omit<SpritesheetData, 'frames'> & {
 };
 
 TextureSource.defaultOptions.scaleMode = 'nearest';
+TextureSource.defaultOptions.wrapMode = 'clamp-to-edge';
 
 export const awaitAllTasks = () => Promise.all(tasks);
 
@@ -65,7 +66,7 @@ export function loadSpritesheetFromArra<const D extends SpritesheetDataArray>(
           const { frame } = data.frames[index];
           assign(item, new Texture({
             source: texture.source,
-            frame: new Rectangle(frame.x, frame.y, frame.w, frame.h)
+            frame: new Rectangle(frame.x, frame.y, frame.w, frame.h),
           }));
           item.update();
         });
